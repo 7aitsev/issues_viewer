@@ -57,12 +57,14 @@ ApplicationWindow {
 
                 enabled: presenter.content_available
 
-                model: 30
+                model: presenter.issues
 
                 delegate: Label {
-                    text: "Item " + (index + 1)
+                    text: modelData
                     font.pixelSize: 16
-                    padding: 4
+                    padding: 8
+
+                    width: list_view.width
                 }
 
                 ScrollBar.vertical: ScrollBar {

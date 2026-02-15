@@ -17,12 +17,16 @@ class IssuesViewerPresenter : public QObject {
     Q_PROPERTY(bool   content_available
                READ   is_content_available
                NOTIFY content_available_changed)
+    Q_PROPERTY(QStringList issues
+               READ        issues
+               NOTIFY      issues_changed)
 
 public:
     explicit IssuesViewerPresenter(QObject *parent = nullptr);
 
     bool is_load_enabled() const;
     bool is_content_available() const;
+    const QStringList& issues() const;
 
     Q_INVOKABLE void on_path_changed(const QString &text);
     Q_INVOKABLE void on_load_issues(const QString &url);
@@ -30,6 +34,7 @@ public:
 signals:
     void load_enabled_changed();
     void content_available_changed();
+    void issues_changed();
 
 private:
     void _on_request_finished(QNetworkReply *reply);

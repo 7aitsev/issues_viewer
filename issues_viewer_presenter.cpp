@@ -21,6 +21,10 @@ bool IssuesViewerPresenter::is_content_available() const {
     return _is_content_available;
 }
 
+const QStringList& IssuesViewerPresenter::issues() const {
+    return _issues;
+}
+
 void IssuesViewerPresenter::on_path_changed(const QString &text) {
     const auto allowed = !text.trimmed().isEmpty();
     if (_is_load_enabled != allowed) {
