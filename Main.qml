@@ -8,34 +8,26 @@ ApplicationWindow {
     visible: true
     title: "Issues Viewer"
 
-    id: root
-
-    property int current_page_count: 1
-    property int total_page_count: 1
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
         spacing: 16
 
         RowLayout {
-            id: input_row
-
             Layout.fillWidth: true
-
             spacing: 16
 
             TextField {
                 id: path
-                placeholderText: "Enter the URL of a GitHub repository..."
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
+
+                placeholderText: "Enter the URL of a GitHub repository..."
 
                 onTextChanged: presenter.on_path_changed(text)
             }
 
             Button {
-                id: load
                 text: "Load"
 
                 enabled: presenter.load_enabled
@@ -45,10 +37,11 @@ ApplicationWindow {
         }
 
         Rectangle {
-            border.color: "#AEAEAE"
-            radius: 4
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            border.color: "#AEAEAE"
+            radius: 4
             clip: true
 
             ListView {
@@ -79,10 +72,11 @@ ApplicationWindow {
             enabled: presenter.content_available
 
             Button {
+                Layout.preferredHeight: path.implicitHeight
+
                 enabled: presenter.previous_page_available
                 // text: "<"
                 icon.name: "go-previous"
-                Layout.preferredHeight: path.implicitHeight
 
                 onClicked: presenter.on_load_previous_page()
             }
@@ -95,10 +89,11 @@ ApplicationWindow {
             }
 
             Button {
+                Layout.preferredHeight: path.implicitHeight
+
                 enabled: presenter.next_page_available
                 // text: ">"
                 icon.name: "go-next"
-                Layout.preferredHeight: path.implicitHeight
 
                 onClicked: presenter.on_load_next_page()
             }

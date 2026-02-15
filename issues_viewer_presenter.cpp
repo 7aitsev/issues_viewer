@@ -1,37 +1,25 @@
 #include "issues_viewer_presenter.h"
 
 #include <QDebug>
-#include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
 
 IssuesViewerPresenter::IssuesViewerPresenter(QObject *parent)
-    : QObject(parent), _manager(std::make_unique<QNetworkAccessManager>(this))
-{
-    connect(_manager.get(), &QNetworkAccessManager::finished,
-            this, &IssuesViewerPresenter::_on_request_finished);
+    : QObject(parent), _manager(std::make_unique<QNetworkAccessManager>(this)) {
+    connect(_manager.get(), &QNetworkAccessManager::finished, this, &IssuesViewerPresenter::_on_request_finished);
 }
 
-bool IssuesViewerPresenter::is_load_enabled() const {
-    return _is_load_enabled;
-}
+bool IssuesViewerPresenter::is_load_enabled() const { return _is_load_enabled; }
 
-bool IssuesViewerPresenter::is_content_available() const {
-    return _is_content_available;
-}
+bool IssuesViewerPresenter::is_content_available() const { return _is_content_available; }
 
-bool IssuesViewerPresenter::is_previous_page_available() const {
-    return !_previous_page_path.isEmpty();
-}
+bool IssuesViewerPresenter::is_previous_page_available() const { return !_previous_page_path.isEmpty(); }
 
-bool IssuesViewerPresenter::is_next_page_available() const {
-    return !_next_page_path.isEmpty();
-}
+bool IssuesViewerPresenter::is_next_page_available() const { return !_next_page_path.isEmpty(); }
 
-const QStringList& IssuesViewerPresenter::issues() const {
-    return _issues;
-}
+const QStringList &IssuesViewerPresenter::issues() const { return _issues; }
 
 QString IssuesViewerPresenter::pagination_text() const {
     if (_total_pages) {
@@ -106,7 +94,8 @@ void IssuesViewerPresenter::_on_request_finished(QNetworkReply *reply) {
 }
 
 void IssuesViewerPresenter::_parse_navigation_links(const QString &headers) {
-    if (headers.isEmpty()) return;
+    if (headers.isEmpty())
+        return;
 
     QRegularExpression prev_mask("<(.+)>; rel=\"prev\"");
     QRegularExpression next_mask("<(.+)>; rel=\"next\"");

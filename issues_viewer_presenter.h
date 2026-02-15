@@ -12,6 +12,7 @@ class QString;
 class IssuesViewerPresenter : public QObject {
     Q_OBJECT
 
+    // clang-format off
     Q_PROPERTY(bool   load_enabled
                READ   is_load_enabled
                NOTIFY load_enabled_changed)
@@ -30,6 +31,7 @@ class IssuesViewerPresenter : public QObject {
     Q_PROPERTY(QString pagination_text
                READ    pagination_text
                NOTIFY  pagination_text_changed)
+    // clang-format on
 
 public:
     explicit IssuesViewerPresenter(QObject *parent = nullptr);
@@ -38,7 +40,7 @@ public:
     bool is_content_available() const;
     bool is_previous_page_available() const;
     bool is_next_page_available() const;
-    const QStringList& issues() const;
+    const QStringList &issues() const;
     QString pagination_text() const;
 
     Q_INVOKABLE void on_path_changed(const QString &text);
