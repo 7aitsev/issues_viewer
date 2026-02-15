@@ -79,9 +79,12 @@ ApplicationWindow {
             enabled: presenter.content_available
 
             Button {
+                enabled: presenter.previous_page_available
                 // text: "<"
                 icon.name: "go-previous"
                 Layout.preferredHeight: path.implicitHeight
+
+                onClicked: presenter.on_load_previous_page()
             }
 
             Label {
@@ -92,9 +95,12 @@ ApplicationWindow {
             }
 
             Button {
+                enabled: presenter.next_page_available
                 // text: ">"
                 icon.name: "go-next"
                 Layout.preferredHeight: path.implicitHeight
+
+                onClicked: presenter.on_load_next_page()
             }
         }
     }

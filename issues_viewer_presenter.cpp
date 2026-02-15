@@ -21,6 +21,14 @@ bool IssuesViewerPresenter::is_content_available() const {
     return _is_content_available;
 }
 
+bool IssuesViewerPresenter::is_previous_page_available() const {
+    return !_previous_page_path.isEmpty();
+}
+
+bool IssuesViewerPresenter::is_next_page_available() const {
+    return !_next_page_path.isEmpty();
+}
+
 const QStringList& IssuesViewerPresenter::issues() const {
     return _issues;
 }
@@ -34,10 +42,24 @@ void IssuesViewerPresenter::on_path_changed(const QString &text) {
 }
 
 void IssuesViewerPresenter::on_load_issues(const QString &url) {
+    if (url.isEmpty()) {
+        return;
+    }
+
     _issues.clear();
+    _previous_page_path.clear();
+    _next_page_path.clear();
 
     QNetworkRequest request(url.trimmed());
     _manager->get(request);
+}
+
+void IssuesViewerPresenter::on_load_previous_page() {
+    on_load_issues(QString(_previous_page_path));
+}
+
+void IssuesViewerPresenter::on_load_next_page() {
+    on_load_issues(QString(_next_page_path));
 }
 
 void IssuesViewerPresenter::_on_request_finished(QNetworkReply *reply) {
@@ -62,10 +84,28 @@ void IssuesViewerPresenter::_on_request_finished(QNetworkReply *reply) {
         _is_content_available = is_content_available;
         emit content_available_changed();
     }
+    emit issues_changed();
+    emit previous_page_available_changed();
+    emit next_page_available_changed();
 }
 
 void IssuesViewerPresenter::_parse_navigation_links(const QString &headers) {
     if (headers.isEmpty()) return;
+
+    QRegularExpression prev_mask("<(.+)>; rel=\"prev\"");
+    QRegularExpression next_mask("<(.+)>; rel=\"next\"");
+
+    auto match = prev_mask.match(headers);
+    if (match.hasMatch()) {
+        _previous_page_path = match.captured(1);
+    }
+
+    match = next_mask.match(headers);
+    if (match.hasMatch()) {
+        _next_page_path = match.captured(1);
+
+        // _total_pages = current_page + 1;
+    }
 }
 
 void IssuesViewerPresenter::_parse_issue_titles(const QByteArray &data) {
