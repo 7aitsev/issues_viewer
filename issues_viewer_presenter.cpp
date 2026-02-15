@@ -33,11 +33,24 @@ const QStringList& IssuesViewerPresenter::issues() const {
     return _issues;
 }
 
+QString IssuesViewerPresenter::pagination_text() const {
+    if (_total_pages) {
+        return QString("%1 / %2").arg(_current_page + 1).arg(_total_pages + 1);
+    }
+    return QString();
+}
+
 void IssuesViewerPresenter::on_path_changed(const QString &text) {
     const auto allowed = !text.trimmed().isEmpty();
     if (_is_load_enabled != allowed) {
         _is_load_enabled = allowed;
         emit load_enabled_changed();
+    }
+    if (_is_content_available) {
+        _is_content_available = false;
+        _current_page = 0;
+        _total_pages = 0;
+        emit content_available_changed();
     }
 }
 
@@ -55,10 +68,12 @@ void IssuesViewerPresenter::on_load_issues(const QString &url) {
 }
 
 void IssuesViewerPresenter::on_load_previous_page() {
+    _current_page -= 1;
     on_load_issues(QString(_previous_page_path));
 }
 
 void IssuesViewerPresenter::on_load_next_page() {
+    _current_page += 1;
     on_load_issues(QString(_next_page_path));
 }
 
@@ -87,6 +102,7 @@ void IssuesViewerPresenter::_on_request_finished(QNetworkReply *reply) {
     emit issues_changed();
     emit previous_page_available_changed();
     emit next_page_available_changed();
+    emit pagination_text_changed();
 }
 
 void IssuesViewerPresenter::_parse_navigation_links(const QString &headers) {
@@ -104,7 +120,9 @@ void IssuesViewerPresenter::_parse_navigation_links(const QString &headers) {
     if (match.hasMatch()) {
         _next_page_path = match.captured(1);
 
-        // _total_pages = current_page + 1;
+        if (_current_page + 1 > _total_pages) {
+            _total_pages = _current_page + 1;
+        }
     }
 }
 

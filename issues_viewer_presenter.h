@@ -27,6 +27,9 @@ class IssuesViewerPresenter : public QObject {
     Q_PROPERTY(QStringList issues
                READ        issues
                NOTIFY      issues_changed)
+    Q_PROPERTY(QString pagination_text
+               READ    pagination_text
+               NOTIFY  pagination_text_changed)
 
 public:
     explicit IssuesViewerPresenter(QObject *parent = nullptr);
@@ -36,6 +39,7 @@ public:
     bool is_previous_page_available() const;
     bool is_next_page_available() const;
     const QStringList& issues() const;
+    QString pagination_text() const;
 
     Q_INVOKABLE void on_path_changed(const QString &text);
     Q_INVOKABLE void on_load_issues(const QString &url);
@@ -48,6 +52,7 @@ signals:
     void previous_page_available_changed();
     void next_page_available_changed();
     void issues_changed();
+    void pagination_text_changed();
 
 private:
     void _on_request_finished(QNetworkReply *reply);
@@ -61,6 +66,8 @@ private:
     QString _previous_page_path;
     QString _next_page_path;
 
+    uint16_t _current_page = 0;
+    uint16_t _total_pages = 0;
     bool _is_load_enabled = false;
     bool _is_content_available = false;
 };

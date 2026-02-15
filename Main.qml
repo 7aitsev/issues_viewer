@@ -88,7 +88,7 @@ ApplicationWindow {
             }
 
             Label {
-                text: current_page_count + " / " + total_page_count
+                text: presenter.pagination_text
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
