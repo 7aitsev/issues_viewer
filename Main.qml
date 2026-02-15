@@ -25,6 +25,7 @@ ApplicationWindow {
                 placeholderText: "Enter the URL of a GitHub repository..."
 
                 onTextChanged: presenter.on_path_changed(text)
+                onAccepted: presenter.on_load_issues(text)
             }
 
             Button {
