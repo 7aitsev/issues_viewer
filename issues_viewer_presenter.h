@@ -1,9 +1,11 @@
 #pragma once
 
+#include <QNetworkAccessManager>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
-#include <vector>
+#include <memory>
 
 class QString;
 
@@ -30,10 +32,14 @@ signals:
     void content_available_changed();
 
 private:
-    static std::vector<QString> _request_issues(const QString &url);
+    void _on_request_finished(QNetworkReply *reply);
+    void _parse_navigation_links(const QString &headers);
+    void _parse_issue_titles(const QByteArray &data);
 
 private:
-    std::vector<QString> _issues;
+    std::unique_ptr<QNetworkAccessManager> _manager;
+
+    QStringList _issues;
 
     bool _is_load_enabled = false;
     bool _is_content_available = false;

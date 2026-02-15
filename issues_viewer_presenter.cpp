@@ -1,13 +1,16 @@
 #include "issues_viewer_presenter.h"
 
 #include <QDebug>
-
-#include <future>
-#include <thread>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QNetworkReply>
 
 IssuesViewerPresenter::IssuesViewerPresenter(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), _manager(std::make_unique<QNetworkAccessManager>(this))
 {
+    connect(_manager.get(), &QNetworkAccessManager::finished,
+            this, &IssuesViewerPresenter::_on_request_finished);
 }
 
 bool IssuesViewerPresenter::is_load_enabled() const {
@@ -27,19 +30,64 @@ void IssuesViewerPresenter::on_path_changed(const QString &text) {
 }
 
 void IssuesViewerPresenter::on_load_issues(const QString &url) {
-    qDebug() << "Presenter is processing URL:" << url;
+    _issues.clear();
 
-    auto future = std::async(std::launch::deferred, _request_issues, std::ref(url));
-
-    try {
-        _issues = std::move(future.get());
-    } catch (...) {
-    }
-
-    _is_content_available = !_is_content_available;
-    emit content_available_changed();
+    QNetworkRequest request(url.trimmed());
+    _manager->get(request);
 }
 
-std::vector<QString> IssuesViewerPresenter::_request_issues(const QString &url) {
+void IssuesViewerPresenter::_on_request_finished(QNetworkReply *reply) {
+    if (!reply) {
+        return;
+    }
 
+    if (reply->error() == QNetworkReply::NoError) {
+        auto data = reply->readAll();
+        qDebug() << "Data received:" << data.left(64) << "...";
+
+        _parse_navigation_links(reply->rawHeader("Link"));
+        _parse_issue_titles(data);
+    } else {
+        qDebug() << "Error:" << reply->errorString();
+    }
+
+    reply->deleteLater();
+
+    const auto is_content_available = !_issues.empty();
+    if (_is_content_available != is_content_available) {
+        _is_content_available = is_content_available;
+        emit content_available_changed();
+    }
+}
+
+void IssuesViewerPresenter::_parse_navigation_links(const QString &headers) {
+    if (headers.isEmpty()) return;
+}
+
+void IssuesViewerPresenter::_parse_issue_titles(const QByteArray &data) {
+    QJsonParseError error;
+    const auto doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error != QJsonParseError::NoError) {
+        qDebug() << "JSON Error:" << error.errorString();
+        return;
+    }
+
+    if (!doc.isArray()) {
+        qDebug() << "JSON has wrong format: expected array";
+        return;
+    }
+
+    const auto issues = doc.array();
+    for (const QJsonValue &item : issues) {
+        if (!item.isObject()) {
+            continue;
+        }
+
+        QJsonObject issue = item.toObject();
+        if (issue.contains("title") && issue["title"].isString()) {
+            QString title = issue["title"].toString();
+            _issues.append(title);
+        }
+    }
 }
